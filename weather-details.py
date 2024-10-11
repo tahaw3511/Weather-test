@@ -29,5 +29,39 @@ def get_weather():
         "forecast": forecast
     })
 
+# Route for getting weather forecast for multiple cities
+@app.route('/weather/multiple', methods=['GET'])
+def get_weather_multiple():
+    cities = request.args.getlist('cities')
+    
+    if not cities:
+        return jsonify({"error": "No cities provided"}), 400
+
+    forecasts = {city: weather_data.get(city, "City not found") for city in cities}
+
+    return jsonify(forecasts)
+
+# Route for adding/updating weather data for a city
+@app.route('/weather', methods=['POST'])
+def add_or_update_weather():
+    data = request.json
+
+    city = data.get('city')
+    temperature = data.get('temperature')
+    description = data.get('description')
+    humidity = data.get('humidity')
+
+    if not city or not temperature or not description or not humidity:
+        return jsonify({"error": "Incomplete data provided"}), 400
+
+    weather_data[city] = {
+        "temperature": temperature,
+        "description": description,
+        "humidity": humidity
+    }
+
+    return jsonify({"message": f"Weather data for {city} added/updated successfully"}), 201
+
 if __name__ == '__main__':
     app.run(debug=True)
+
